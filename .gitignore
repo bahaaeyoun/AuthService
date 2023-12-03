@@ -1,14 +1,7 @@
 
-/.idea/
+*.db
 
-/Fathy.Common/Auth/bin/
-/Fathy.Common/Auth/obj/
-
-/Fathy.Common/Email/bin/
-/Fathy.Common/Email/obj/
-
-/Fathy.Common/Startup/bin/
-/Fathy.Common/Startup/obj/
-
-/DemoApp/bin/
-/DemoApp/obj/
+*.idea/
+*obj/
+*bin/
+*Migrations/

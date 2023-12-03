@@ -29,21 +29,18 @@ builder.Services.AddCors(corsOptions => corsOptions.AddDefaultPolicy(
 // Swagger definitions.
 builder.Services.AddSwaggerService(new OpenApiInfo
 {
-    Title = "DemoAuthService",
-    Version = "v1",
-    Description = "An ASP.NET Core Web API for authentication services."
+    Title = builder.Configuration.GetValue<string>("Swagger:OpenApiInfo:Title"),
+    Version = builder.Configuration.GetValue<string>("Swagger:OpenApiInfo:Version"),
+    Description = builder.Configuration.GetValue<string>("Swagger:OpenApiInfo:Description")
 });
 
 // Authentication definitions.
-builder.Services.AddAuthService();
+builder.Services.AddAuthenticationService();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseStaticFiles();
 app.UseHttpsRedirection();

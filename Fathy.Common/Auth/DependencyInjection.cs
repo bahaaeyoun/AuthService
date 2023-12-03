@@ -12,7 +12,7 @@ namespace Fathy.Common.Auth;
 
 public static class DependencyInjection
 {
-    public static void AddAuthService(this IServiceCollection services)
+    public static void AddAuthenticationService(this IServiceCollection services)
     {
         services.AddAuthentication(configureOptions =>
         {
