@@ -1,5 +1,6 @@
 using DemoApp.Database;
 using Fathy.Common.Auth;
+using Fathy.Common.Auth.User.Models;
 using Fathy.Common.Startup;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -13,8 +14,8 @@ builder.Services.AddEndpointsApiExplorer();
 
 // Database definitions.
 builder.Services.AddDbContext<IDemoAppContext, DemoAppContext>(optionsAction =>
-        optionsAction.UseSqlite(builder.Configuration.GetValue<string>("ConnectionStrings:Sqlite")))
-    .AddIdentity<IdentityUser, IdentityRole>(identityOptions =>
+        optionsAction.UseSqlite(builder.Configuration.GetConnectionString("Sqlite")))
+    .AddIdentity<AppUser, IdentityRole>(identityOptions =>
     {
         identityOptions.SignIn.RequireConfirmedAccount =
             builder.Configuration.GetValue<bool>("Database:IdentityOptions:SignIn:RequireConfirmedAccount");
@@ -24,7 +25,7 @@ builder.Services.AddDbContext<IDemoAppContext, DemoAppContext>(optionsAction =>
 
 // Cors definitions.
 builder.Services.AddCors(corsOptions => corsOptions.AddDefaultPolicy(
-    policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+    policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
 // Swagger definitions.
 builder.Services.AddSwaggerService(new OpenApiInfo

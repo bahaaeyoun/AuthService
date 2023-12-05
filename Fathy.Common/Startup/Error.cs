@@ -2,22 +2,13 @@
 
 namespace Fathy.Common.Startup;
 
-public class Error
+public class Error(int statusCode, string errorCode, string description)
 {
-    [JsonIgnore] public int StatusCode { get; }
-    public string ErrorCode { get; }
-    public string Description { get; }
+    [JsonIgnore] public int StatusCode { get; } = statusCode;
+    public string ErrorCode { get; } = errorCode;
+    public string Description { get; } = description;
 
-    public Error(string errorCode, string description)
+    public Error(string errorCode, string description) : this(0, errorCode, description)
     {
-        ErrorCode = errorCode;
-        Description = description;
-    }
-
-    public Error(int statusCode, string errorCode, string description)
-    {
-        StatusCode = statusCode;
-        ErrorCode = errorCode;
-        Description = description;
     }
 }

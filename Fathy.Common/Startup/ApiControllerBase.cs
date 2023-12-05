@@ -7,23 +7,23 @@ namespace Fathy.Common.Startup;
 [Route("api/[controller]/[action]")]
 public class ApiControllerBase : ControllerBase
 {
-    protected IActionResult ResponseToIActionResult(Result response)
+    protected IActionResult ResultToIActionResult(Result result)
     {
-        if (response.Succeeded) return Ok();
+        if (result.Succeeded) return Ok();
 
-        if (response.Errors!.Any(x => x.StatusCode == StatusCodes.Status404NotFound))
-            return NotFound(response.Errors.ToJsonStringContent());
+        if (result.Errors!.Any(x => x.StatusCode == StatusCodes.Status404NotFound))
+            return NotFound(result.Errors.ToJsonStringContent());
 
-        return BadRequest(response.Errors.ToJsonStringContent());
+        return BadRequest(result.Errors.ToJsonStringContent());
     }
 
-    protected IActionResult ResponseToIActionResult<T>(Result<T> response)
+    protected IActionResult ResultToIActionResult<T>(Result<T> result)
     {
-        if (response.Succeeded) return Ok(response.Data.ToJsonStringContent());
+        if (result.Succeeded) return Ok(result.Data.ToJsonStringContent());
 
-        if (response.Errors!.Any(x => x.StatusCode == StatusCodes.Status404NotFound))
-            return NotFound(response.Errors.ToJsonStringContent());
+        if (result.Errors!.Any(x => x.StatusCode == StatusCodes.Status404NotFound))
+            return NotFound(result.Errors.ToJsonStringContent());
 
-        return BadRequest(response.Errors.ToJsonStringContent());
+        return BadRequest(result.Errors.ToJsonStringContent());
     }
 }

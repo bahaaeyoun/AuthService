@@ -8,25 +8,19 @@ using Microsoft.AspNetCore.Mvc;
 namespace Fathy.Common.Auth.Admin.Controllers;
 
 [Authorize(Roles = Roles.Admin)]
-public class AdminController : ApiControllerBase
+public class AdminController(IAdminRepository adminRepository) : ApiControllerBase
 {
-    private readonly IAdminRepository _adminRepository;
-
-    public AdminController(IAdminRepository adminRepository)
-    {
-        _adminRepository = adminRepository;
-    }
-
     [HttpPost]
     [ProducesResponseType(typeof(Result), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(IEnumerable<Error>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(IEnumerable<Error>), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> AddToRoleAdmin([FromQuery] string userEmail) =>
-        ResponseToIActionResult(await _adminRepository.AddToRoleAsync(userEmail, Roles.Admin));
+        ResultToIActionResult(await adminRepository.AddToRoleAsync(userEmail, Roles.Admin));
 
     [HttpPost]
     [ProducesResponseType(typeof(Result), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(IEnumerable<Error>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(IEnumerable<Error>), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> CreateAdminRole() =>
-        ResponseToIActionResult(await _adminRepository.CreateRoleAsync(Roles.Admin));
+        ResultToIActionResult(await adminRepository.CreateRoleAsync(Roles.Admin));
 }

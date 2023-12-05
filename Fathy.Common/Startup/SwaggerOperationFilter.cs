@@ -14,11 +14,11 @@ public class SwaggerOperationFilter : IOperationFilter
             .OfType<HttpMethodAttribute>();
 
         var httpMethodWithOptional = httpMethodAttributes.FirstOrDefault(httpMethodAttribute =>
-            httpMethodAttribute.Template?.Contains("?") ?? false);
+            httpMethodAttribute.Template?.Contains('?') ?? false);
 
         if (httpMethodWithOptional is null) return;
 
-        const string pattern = $"{{(?<RouteParameter>\\w+)\\?}}";
+        const string pattern = $@"{{(?<RouteParameter>\w+)\?}}";
 
         var matches = Regex.Matches(httpMethodWithOptional.Template ?? string.Empty, pattern).ToArray();
 
