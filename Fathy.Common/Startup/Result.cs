@@ -9,7 +9,8 @@ public class Result(bool succeeded, IEnumerable<Error>? errors)
     public static Result Failure(IEnumerable<Error>? errors = default) => new(false, errors);
 }
 
-public class Result<T>(bool succeeded, IEnumerable<Error>? errors, T? data) : Result(succeeded, errors)
+public class Result<T>(bool succeeded, IEnumerable<Error>? errors, T? data) : Result(succeeded,
+    errors)
 {
     public T? Data { get; } = data;
 

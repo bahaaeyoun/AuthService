@@ -7,23 +7,23 @@ namespace Fathy.Common.Startup;
 [Route("api/[controller]/[action]")]
 public class ApiControllerBase : ControllerBase
 {
-    protected IActionResult ResultToIActionResult(Result result)
+    protected IActionResult ToIActionResult(Result result)
     {
         if (result.Succeeded) return Ok();
 
-        if (result.Errors!.Any(x => x.StatusCode == StatusCodes.Status404NotFound))
-            return NotFound(result.Errors.ToJsonStringContent());
+        if (result.Errors!.Any(error => error.StatusCode == StatusCodes.Status404NotFound))
+            return NotFound(result.Errors);
 
-        return BadRequest(result.Errors.ToJsonStringContent());
+        return BadRequest(result.Errors);
     }
 
-    protected IActionResult ResultToIActionResult<T>(Result<T> result)
+    protected IActionResult ToIActionResult<T>(Result<T> result)
     {
-        if (result.Succeeded) return Ok(result.Data.ToJsonStringContent());
+        if (result.Succeeded) return Ok(result.Data);
 
-        if (result.Errors!.Any(x => x.StatusCode == StatusCodes.Status404NotFound))
-            return NotFound(result.Errors.ToJsonStringContent());
+        if (result.Errors!.Any(error => error.StatusCode == StatusCodes.Status404NotFound))
+            return NotFound(result.Errors);
 
-        return BadRequest(result.Errors.ToJsonStringContent());
+        return BadRequest(result.Errors);
     }
 }

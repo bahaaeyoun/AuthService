@@ -13,9 +13,9 @@ public class AdminRepository(UserManager<AppUser> userManager, RoleManager<Ident
         
         return user is null
             ? Result.Failure(new[] { ErrorsList.UserEmailNotFound() })
-            : (await userManager.AddToRoleAsync(user, role)).ToApplicationResult();
+            : (await userManager.AddToRoleAsync(user, role)).ToResult();
     }
 
     public async Task<Result> CreateRoleAsync(string role) =>
-        (await roleManager.CreateAsync(new IdentityRole(role))).ToApplicationResult();
+        (await roleManager.CreateAsync(new IdentityRole(role))).ToResult();
 }

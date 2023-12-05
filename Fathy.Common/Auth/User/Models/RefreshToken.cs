@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fathy.Common.Auth.User.Models;
@@ -5,6 +6,9 @@ namespace Fathy.Common.Auth.User.Models;
 [Owned]
 public class RefreshToken
 {
+    [Key]
+    public int Id { get; set; }
+    
     public string Token { get; set; } = null!;
     public DateTime CreatedOn { get; set; }
     

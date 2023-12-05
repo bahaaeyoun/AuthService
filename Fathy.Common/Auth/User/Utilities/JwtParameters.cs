@@ -1,6 +1,6 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 
-namespace Fathy.Common.Auth.JWT.Utilities;
+namespace Fathy.Common.Auth.User.Utilities;
 
 public static class JwtParameters
 {
