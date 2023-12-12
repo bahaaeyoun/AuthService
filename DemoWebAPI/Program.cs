@@ -15,8 +15,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 // Database definitions.
-builder.Services.AddDbContext<DemoAppContext>(optionsAction =>
-        optionsAction.UseSqlite(builder.Configuration.GetConnectionString("Sqlite")))
+builder.Services.AddDbContext<DemoAppContext>(optionsBuilder =>
+        optionsBuilder.UseSqlite(builder.Configuration.GetConnectionString("Sqlite")))
     .AddIdentity<AppUser, IdentityRole>(identityOptions =>
     {
         identityOptions.SignIn.RequireConfirmedAccount =
@@ -27,14 +27,14 @@ builder.Services.AddDbContext<DemoAppContext>(optionsAction =>
 
 // Cors definitions.
 builder.Services.AddCors(corsOptions => corsOptions.AddDefaultPolicy(
-    policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+    policyBuilder => policyBuilder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
 // Swagger definitions.
-builder.Services.AddSwaggerGen(swaggerGenOption =>
+builder.Services.AddSwaggerGen(options =>
 {
-    swaggerGenOption.OperationFilter<SwaggerOperationFilter>();
+    options.OperationFilter<SwaggerOperationFilter>();
 
-    swaggerGenOption.SwaggerDoc(
+    options.SwaggerDoc(
         builder.Configuration.GetValue<string>("Swagger:OpenApiInfo:Version"), new OpenApiInfo
         {
             Title = builder.Configuration.GetValue<string>("Swagger:OpenApiInfo:Title"),
@@ -42,7 +42,7 @@ builder.Services.AddSwaggerGen(swaggerGenOption =>
             Description = builder.Configuration.GetValue<string>("Swagger:OpenApiInfo:Description")
         });
 
-    swaggerGenOption.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.Http,
@@ -52,7 +52,7 @@ builder.Services.AddSwaggerGen(swaggerGenOption =>
         BearerFormat = "JWT"
     });
 
-    swaggerGenOption.AddSecurityRequirement(new OpenApiSecurityRequirement
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
             new OpenApiSecurityScheme
@@ -69,19 +69,15 @@ builder.Services.AddSwaggerGen(swaggerGenOption =>
 });
 
 // Authentication definitions.
-builder.Services.AddAuthentication(configureOptions =>
+builder.Services.AddAuthentication(options =>
 {
-    configureOptions.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-    configureOptions.DefaultForbidScheme = JwtBearerDefaults.AuthenticationScheme;
-    configureOptions.DefaultSignInScheme = JwtBearerDefaults.AuthenticationScheme;
-    configureOptions.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;
-    configureOptions.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    configureOptions.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(configureOptions =>
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
 {
-    // TODO: test.
-    configureOptions.SaveToken = true;
-    configureOptions.TokenValidationParameters = new TokenValidationParameters
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
     {
         ClockSkew = TimeSpan.Zero,
         ValidateIssuer = true,
@@ -94,6 +90,8 @@ builder.Services.AddAuthentication(configureOptions =>
     };
 });
 
+builder.Services.AddAuthorization();
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAdminRepository, AdminRepository>();
 
@@ -101,6 +99,9 @@ var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI();
+
+app.UseCors();
+app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();

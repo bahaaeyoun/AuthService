@@ -15,9 +15,11 @@ using Microsoft.IdentityModel.Tokens;
 namespace AuthService.Repositories;
 
 public class UserRepository(UserManager<AppUser> userManager, IConfiguration configuration,
-        SignInManager<AppUser> signInManager) : IUserRepository
+    SignInManager<AppUser> signInManager) : IUserRepository
 {
-    private readonly string _from = configuration.GetValue<string>("SmtpClient:Credentials:UserName") ?? string.Empty;
+    private readonly string _from =
+        configuration.GetValue<string>("SmtpClient:Credentials:UserName") ?? string.Empty;
+
     private readonly SmtpClient _smtpClient = new()
     {
         Host = configuration.GetValue<string>("SmtpClient:Host") ?? string.Empty,
@@ -27,11 +29,11 @@ public class UserRepository(UserManager<AppUser> userManager, IConfiguration con
             configuration.GetValue<string>("SmtpClient:Credentials:UserName"),
             configuration.GetValue<string>("SmtpClient:Credentials:Password"))
     };
-    
+
     public async Task<Result> ConfirmEmailAsync(string userEmail, string token)
     {
         var user = await userManager.FindByEmailAsync(userEmail);
-        
+
         return user is null
             ? Result.Failure(new[] { Error.UserEmailNotFound() })
             : (await userManager.ConfirmEmailAsync(user, token)).ToResult();
@@ -46,7 +48,7 @@ public class UserRepository(UserManager<AppUser> userManager, IConfiguration con
             FirstName = userDto.FirstName,
             LastName = userDto.LastName
         }, userDto.Password);
-        
+
         return createResult.Succeeded
             ? await SendConfirmationEmailAsync(userDto.Email)
             : createResult.ToResult();
@@ -55,7 +57,7 @@ public class UserRepository(UserManager<AppUser> userManager, IConfiguration con
     public async Task<Result> DeleteAsync(SignInDto signInDto)
     {
         var user = await userManager.FindByEmailAsync(signInDto.Email);
-        
+
         return user is null || !await userManager.CheckPasswordAsync(user, signInDto.Password)
             ? Result.Failure(new[] { Error.WrongEmailOrPassword() })
             : (await userManager.DeleteAsync(user)).ToResult();
@@ -70,7 +72,7 @@ public class UserRepository(UserManager<AppUser> userManager, IConfiguration con
             return Result<AuthDto>.Failure(new[] { Error.InvalidRefreshToken() });
 
         var token = user.RefreshTokens.Single(token => token.Token == refreshToken);
-        
+
         if (!token.IsActive)
             return Result<AuthDto>.Failure(new[] { Error.InactiveRefreshToken() });
 
@@ -88,20 +90,20 @@ public class UserRepository(UserManager<AppUser> userManager, IConfiguration con
             RefreshTokenExpiresAt = newRefreshToken.ExpiresAt
         });
     }
-    
+
     public async Task<Result> RevokeRefreshTokenAsync(string refreshToken)
     {
         var user = await userManager.Users.SingleOrDefaultAsync(user =>
             user.RefreshTokens.Any(token => token.Token == refreshToken));
-        
+
         if (user is null)
             return Result.Failure(new[] { Error.InvalidRefreshToken() });
-        
+
         var token = user.RefreshTokens.Single(token => token.Token == refreshToken);
-        
+
         if (!token.IsActive)
             return Result.Failure(new[] { Error.InactiveRefreshToken() });
-        
+
         token.RevokedAt = DateTime.UtcNow;
         await userManager.UpdateAsync(user);
         return Result.Success();
@@ -130,9 +132,9 @@ public class UserRepository(UserManager<AppUser> userManager, IConfiguration con
 
     public async Task<Result<AuthDto>> SignInAsync(SignInDto signInDto)
     {
-        var passwordSignInResult = await signInManager.PasswordSignInAsync(signInDto.Email, signInDto.Password,
-            isPersistent: true, lockoutOnFailure: false);
-        
+        var passwordSignInResult = await signInManager.PasswordSignInAsync(signInDto.Email,
+            signInDto.Password, isPersistent: true, lockoutOnFailure: false);
+
         if (passwordSignInResult.IsNotAllowed)
             return Result<AuthDto>.Failure(new[] { Error.SignInForbidden() });
 
@@ -145,31 +147,31 @@ public class UserRepository(UserManager<AppUser> userManager, IConfiguration con
             JwtSecurityToken =
                 new JwtSecurityTokenHandler().WriteToken(await GenerateJwtSecurityTokenAsync(user!))
         };
-        
-        if (user!.RefreshTokens.Any(refreshToken =>  refreshToken.IsActive))
+
+        if (user!.RefreshTokens.Any(refreshToken => refreshToken.IsActive))
         {
-            var activeRefreshToken = user.RefreshTokens.FirstOrDefault(refreshToken => refreshToken.IsActive);
-            
+            var activeRefreshToken =
+                user.RefreshTokens.FirstOrDefault(refreshToken => refreshToken.IsActive);
+
             authDto.RefreshToken = activeRefreshToken!.Token;
             authDto.RefreshTokenExpiresAt = activeRefreshToken.ExpiresAt;
         }
         else
         {
             var refreshToken = GenerateRefreshToken();
-            
+
             authDto.RefreshToken = refreshToken.Token;
             authDto.RefreshTokenExpiresAt = refreshToken.ExpiresAt;
-            
+
             user.RefreshTokens.Add(refreshToken);
             await userManager.UpdateAsync(user);
         }
-        
+
         return Result<AuthDto>.Success(authDto);
     }
 
     private async Task<JwtSecurityToken> GenerateJwtSecurityTokenAsync(AppUser user)
     {
-        
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Sub, user.UserName!),
@@ -179,25 +181,25 @@ public class UserRepository(UserManager<AppUser> userManager, IConfiguration con
 
         var roles = await userManager.GetRolesAsync(user);
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
-        
-        // claims.AddRange(await userManager.GetClaimsAsync(user));
 
         return new JwtSecurityToken(
             issuer: configuration.GetValue<string>("JWT:ValidIssuer"),
             audience: configuration.GetValue<string>("JWT:ValidAudience"),
             claims: claims,
-            expires: DateTime.UtcNow.AddDays(
-                configuration.GetValue<int>("JWT:ExpirationDuration")),
-                signingCredentials: new SigningCredentials(
-                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-                        configuration.GetValue<string>("JWT:Key") ?? string.Empty)),
-                    SecurityAlgorithms.HmacSha256)
-            );
+            expires: DateTime.UtcNow.AddHours(
+                configuration.GetValue<int>("JWT:ExpirationDurationInHours")),
+            signingCredentials: new SigningCredentials(
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                    configuration.GetValue<string>("JWT:Key") ?? string.Empty)),
+                SecurityAlgorithms.HmacSha256)
+        );
     }
-    
-    private static RefreshToken GenerateRefreshToken() => new()
+
+    private RefreshToken GenerateRefreshToken() => new()
     {
         Token = Convert.ToBase64String(Guid.NewGuid().ToByteArray()),
-        ExpiresAt = DateTime.UtcNow.AddDays(7)
+        ExpiresAt =
+            DateTime.UtcNow.AddDays(
+                configuration.GetValue<int>("RefreshTokenExpirationDurationInDays"))
     };
 }

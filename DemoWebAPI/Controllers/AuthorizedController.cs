@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace DemoWebAPI.Controllers;
 
 [Authorize]
-public class SecuredController : ApiControllerBase
+public class AuthorizedController : ApiControllerBase
 {
     [HttpGet]
     public IActionResult HelloWorld() => Ok("Hello, World!");

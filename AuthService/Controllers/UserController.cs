@@ -50,16 +50,16 @@ public class UserController(IUserRepository userRepository)
         var refreshToken = Request.Cookies[nameof(RefreshToken)];
 
         var newRefreshTokenResult = await userRepository.NewRefreshTokenAsync(refreshToken!);
-        
+
         if (!newRefreshTokenResult.Succeeded)
             return ToIActionResult(newRefreshTokenResult);
 
         SetRefreshTokenInCookie(newRefreshTokenResult.Data!.RefreshToken,
             newRefreshTokenResult.Data.RefreshTokenExpiresAt);
-        
+
         return ToIActionResult(newRefreshTokenResult);
     }
-    
+
     [HttpGet]
     [ProducesResponseType(typeof(Result), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Result), StatusCodes.Status404NotFound)]

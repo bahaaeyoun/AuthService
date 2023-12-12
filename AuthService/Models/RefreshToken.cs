@@ -13,5 +13,5 @@ public class RefreshToken
     public DateTime ExpiresAt { get; init; }
     public DateTime? RevokedAt { get; set; }
     
-    public bool IsActive => RevokedAt == null && ExpiresAt < DateTime.UtcNow;
+    public bool IsActive => RevokedAt is null && DateTime.UtcNow < ExpiresAt;
 }
