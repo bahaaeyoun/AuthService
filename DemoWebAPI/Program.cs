@@ -16,7 +16,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 // Database definitions.
 builder.Services.AddDbContext<DemoAppContext>(optionsBuilder =>
-        optionsBuilder.UseSqlite(builder.Configuration.GetConnectionString("Sqlite")))
+        optionsBuilder.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer")))
     .AddIdentity<AppUser, IdentityRole>(identityOptions =>
     {
         identityOptions.SignIn.RequireConfirmedAccount =
