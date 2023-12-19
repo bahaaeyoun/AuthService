@@ -33,7 +33,7 @@ public class SwaggerOperationFilter : IOperationFilter
             parameter.AllowEmptyValue = true;
             parameter.Schema.Nullable = true;
             parameter.Description =
-                "Must check \"Send empty value\" or Swagger passes a comma(,) for empty values otherwise.";
+                "Must check \"Send empty value bahaa bahaaaaaa\" or Swagger passes a comma(,) for empty values otherwise.";
         }
     }
 }
