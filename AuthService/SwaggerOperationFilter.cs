@@ -5,8 +5,11 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace AuthService;
 
-public class SwaggerOperationFilter : IOperationFilter
+public partial class SwaggerOperationFilter : IOperationFilter
 {
+    [GeneratedRegex(@"{(?<RouteParameter>\w+)\?}")]
+    private static partial Regex Pattern();
+    
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
         var httpMethodAttributes = context.MethodInfo
@@ -17,10 +20,8 @@ public class SwaggerOperationFilter : IOperationFilter
             httpMethodAttribute.Template?.Contains('?') ?? false);
 
         if (httpMethodWithOptional is null) return;
-
-        const string pattern = $@"{{(?<RouteParameter>\w+)\?}}";
-
-        var matches = Regex.Matches(httpMethodWithOptional.Template ?? string.Empty, pattern).ToArray();
+        
+        var matches = Pattern().Matches(httpMethodWithOptional.Template ?? string.Empty).ToArray();
 
         foreach (var match in matches)
         {

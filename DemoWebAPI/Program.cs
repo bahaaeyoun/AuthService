@@ -12,11 +12,10 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
 
 // Database definitions.
 builder.Services.AddDbContext<DemoAppContext>(optionsBuilder =>
-        optionsBuilder.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer")))
+        optionsBuilder.UseSqlite(builder.Configuration.GetConnectionString("Sqlite")))
     .AddIdentity<AppUser, IdentityRole>(identityOptions =>
     {
         identityOptions.SignIn.RequireConfirmedAccount =
@@ -38,18 +37,17 @@ builder.Services.AddSwaggerGen(options =>
         builder.Configuration.GetValue<string>("Swagger:OpenApiInfo:Version"), new OpenApiInfo
         {
             Title = builder.Configuration.GetValue<string>("Swagger:OpenApiInfo:Title"),
-            Version = builder.Configuration.GetValue<string>("Swagger:OpenApiInfo:Version"),
-            Description = builder.Configuration.GetValue<string>("Swagger:OpenApiInfo:Description")
+            Version = builder.Configuration.GetValue<string>("Swagger:OpenApiInfo:Version")
         });
 
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.Http,
-        Name = "JWT Authentication",
         Scheme = "Bearer",
-        Description = "Please enter JWT Bearer token **only**.",
-        BearerFormat = "JWT"
+        BearerFormat = "JWT",
+        Name = "Authorization",
+        Description = "Please enter JWT Bearer token **only**."
     });
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
